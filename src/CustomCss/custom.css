@@ -1,0 +1,8 @@
+.max-h-custom {
+    max-height: 550px; /* Adjust the height as needed */
+    overflow-y: auto;
+  }
+
+.width-size{
+    width: 500px;
+}
