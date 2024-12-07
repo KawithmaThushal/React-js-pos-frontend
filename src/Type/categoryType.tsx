@@ -2,7 +2,7 @@ interface categoryType{
 
         id:number;
 
-        name:String;
+        name:string;
 
 }
 export default categoryType;

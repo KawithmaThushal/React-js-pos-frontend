@@ -1,10 +1,139 @@
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 import chikenrice from '../assets/chiken.jpg';
+import { useAuth } from '../Contex/AuthContext';
+import categoryType from '../Type/categoryType';
+import ItemType from '../Type/ItemType';
 
 
 function Shoppingcart(){
   
 
+    const {isAuthenticated , jwtToken} = useAuth();
+    const [categories,setcategories] = useState<categoryType[]>([]);
+    const[categoryid,setcategortid] = useState<number | undefined>();
+    const[categoryid1,setcategortid1] = useState<number | undefined>();
+
+    const[citems,setcitems]= useState<ItemType[]>([]);
+    const categoryIdAsNumber = Number(categoryid);
+    const categoryIdAsNumber1 = Number(categoryid1);
+    const[citems1,setcitems1]= useState<ItemType[]>([]);
+
+
+
+
     
+
+    function handleCategoryID(e:any){
+        setcategortid(parseInt(e.target.value));
+        setcitems([]); 
+
+    }
+
+    
+    function handleCategoryID2(e:any){
+        setcategortid1(parseInt(e.target.value));
+        setcitems1([]); 
+
+    }
+    
+    const config = {
+        headers: {
+            Authorization: `Bearer ${jwtToken}`
+        }
+    }
+
+
+    async function loadCategory() {
+
+        try {
+            const response = await axios.get("http://localhost:8081/Categery", config);
+                setcategories(response.data);
+        } catch (error) {
+            console.error("Error loading categories:", error);
+            if (axios.isAxiosError(error)) {
+                console.error("Axios error details:", error.response);
+                if (error.response?.status === 403) {
+                    console.error("Forbidden! You are not authorized to access this resource.");
+                } else if (error.response?.status === 401) {
+                    console.error("Unauthorized! Check your JWT token.");
+                }
+            }
+            
+        }
+        
+    }
+
+    async function loadItems() {
+        
+
+        try {
+            const respones= await axios.get(`http://localhost:8081/category/${categoryIdAsNumber}`,config);
+            setcitems(respones.data);
+        } catch (error) {
+            console.error("Error loading categories:", error);
+            if (axios.isAxiosError(error)) {
+                console.error("Axios error details:", error.response);
+                if (error.response?.status === 403) {
+                    console.error("Forbidden! You are not authorized to access this resource.");
+                } else if (error.response?.status === 401) {
+                    console.error("Unauthorized! Check your JWT token.");
+                }
+            }
+        }
+        
+    }
+
+
+    async function loadItems1() {
+        
+
+        try {
+            const respones= await axios.get(`http://localhost:8081/category/${categoryIdAsNumber1}`,config);
+            setcitems1(respones.data);
+        } catch (error) {
+            console.error("Error loading categories:", error);
+            if (axios.isAxiosError(error)) {
+                console.error("Axios error details:", error.response);
+                if (error.response?.status === 403) {
+                    console.error("Forbidden! You are not authorized to access this resource.");
+                } else if (error.response?.status === 401) {
+                    console.error("Unauthorized! Check your JWT token.");
+                }
+            }
+        }
+        
+    }
+
+    useEffect(() => {
+        if (categoryid ) {
+            loadItems();
+           
+
+        }
+    }, [categoryid]); 
+
+    useEffect(() => {
+
+
+        if (categoryid1 ) {
+            loadItems1();
+           
+
+        }
+    }, [categoryid1]); 
+
+
+
+    useEffect(function() {
+
+        if(isAuthenticated){
+            loadCategory();
+           
+           
+        }
+      
+    },[isAuthenticated]);
 
     return(
         <div className="flex">
@@ -65,8 +194,13 @@ function Shoppingcart(){
           <div className=" w-1/3  bg-white ">
             <div className='pl-5 p-2 mb-3 flex items-center space-x-2'>
                 <label className='text-slate-800 font-serif'>Select Food Category :</label>
-                <select className='text-slate-600 font-serif block mb-3 mt-5 w-52 p-2 border border-slate-300 rounded-lg' required>
+                <select className='text-slate-600 font-serif block mb-3 mt-5 w-52 p-2 border border-slate-300 rounded-lg' value={categoryid} onChange={handleCategoryID} required>
                 <option value="">select category</option>
+                {categories.map(function (category){
+                    return(
+                        <option value={category.id}>{category.name}</option>
+                    )
+                } )}
                 </select>
             </div>
 
@@ -74,130 +208,25 @@ function Shoppingcart(){
             {/* item add */}
            <div className="-mb-2 p-1">
             {/* map function */}
-            <div className="border border-slate-500 rounded-lg p-2 mb-3">
-                <div >
-            <img src={chikenrice} alt='chiken rice' className="h-16 w-16 rounded-lg mr-3 justify-center"  	/>
-
-                <div className='-mt-12'>
-                <div className="text-xl font-serif text-slate-800 text-right">chiken Rice </div>
-                <div className="text-sm text-slate-400 text-right"> Rs.850.00</div>
-                </div>
-                </div>
-            </div>
-
-           </div>
-
-
-           <div className="-mb-2 p-1">
-            {/* map function */}
-            <div className="border border-slate-500 rounded-lg p-2 mb-3">
-                <div >
-            <img src={chikenrice} alt='chiken rice' className="h-16 w-16 rounded-lg mr-3 justify-center"  	/>
-
-                <div className='-mt-12'>
-                <div className="text-xl font-serif text-slate-800 text-right">chiken Rice </div>
-                <div className="text-sm text-slate-400 text-right"> Rs.850.00</div>
-                </div>
+            {citems && citems.length > 0 ? (
+    citems.map(function (item) {
+        return (
+            <div key={item.id} className="border border-slate-500 rounded-lg p-2 mb-3">
+                <div>
+                    <img src={chikenrice} alt="chiken rice" className="h-16 w-16 rounded-lg mr-3 justify-center" />
+                    <div className="-mt-12">
+                        <div className="text-xl font-serif text-slate-800 text-right">{item.name}</div>
+                        <div className="text-sm text-slate-400 text-right">{item.price}</div>
+                    </div>
                 </div>
             </div>
-
+                    );
+                })
+            ) : (
+                <div>No items found in this category.</div>
+            )}
            </div>
-
-           <div className="-mb-2 p-1">
-            {/* map function */}
-            <div className="border border-slate-500 rounded-lg p-2 mb-3">
-                <div >
-            <img src={chikenrice} alt='chiken rice' className="h-16 w-16 rounded-lg mr-3 justify-center"  	/>
-
-                <div className='-mt-12'>
-                <div className="text-xl font-serif text-slate-800 text-right">chiken Rice </div>
-                <div className="text-sm text-slate-400 text-right"> Rs.850.00</div>
-                </div>
-                </div>
-            </div>
-
            </div>
-
-           <div className="-mb-2 p-1">
-            {/* map function */}
-            <div className="border border-slate-500 rounded-lg p-2 mb-3">
-                <div >
-            <img src={chikenrice} alt='chiken rice' className="h-16 w-16 rounded-lg mr-3 justify-center"  	/>
-
-                <div className='-mt-12'>
-                <div className="text-xl font-serif text-slate-800 text-right">chiken Rice </div>
-                <div className="text-sm text-slate-400 text-right"> Rs.850.00</div>
-                </div>
-                </div>
-            </div>
-
-           </div>
-
-           <div className="-mb-2 p-1">
-            {/* map function */}
-            <div className="border border-slate-500 rounded-lg p-2 mb-3">
-                <div >
-            <img src={chikenrice} alt='chiken rice' className="h-16 w-16 rounded-lg mr-3 justify-center"  	/>
-
-                <div className='-mt-12'>
-                <div className="text-xl font-serif text-slate-800 text-right">chiken Rice </div>
-                <div className="text-sm text-slate-400 text-right"> Rs.850.00</div>
-                </div>
-                </div>
-            </div>
-
-           </div>
-           <div className="-mb-2 p-1">
-            {/* map function */}
-            <div className="border border-slate-500 rounded-lg p-2 mb-3">
-                <div >
-            <img src={chikenrice} alt='chiken rice' className="h-16 w-16 rounded-lg mr-3 justify-center"  	/>
-
-                <div className='-mt-12'>
-                <div className="text-xl font-serif text-slate-800 text-right">chiken Rice </div>
-                <div className="text-sm text-slate-400 text-right"> Rs.850.00</div>
-                </div>
-                </div>
-            </div>
-
-           </div>
-
-           <div className="-mb-2 p-1">
-            {/* map function */}
-            <div className="border border-slate-500 rounded-lg p-2 mb-3">
-                <div >
-            <img src={chikenrice} alt='chiken rice' className="h-16 w-16 rounded-lg mr-3 justify-center"  	/>
-
-                <div className='-mt-12'>
-                <div className="text-xl font-serif text-slate-800 text-right">chiken Rice </div>
-                <div className="text-sm text-slate-400 text-right"> Rs.850.00</div>
-                </div>
-                </div>
-            </div>
-
-           </div>
-
-           <div className="-mb-2 p-1">
-            {/* map function */}
-            <div className="border border-slate-500 rounded-lg p-2 mb-3">
-                <div >
-            <img src={chikenrice} alt='chiken rice' className="h-16 w-16 rounded-lg mr-3 justify-center"  	/>
-
-                <div className='-mt-12'>
-                <div className="text-xl font-serif text-slate-800 text-right">chiken Rice </div>
-                <div className="text-sm text-slate-400 text-right"> Rs.850.00</div>
-                </div>
-                </div>
-            </div>
-
-           </div>
-
-           
-           </div>
-           
-           
-
-           
           </div>
 
 
@@ -205,8 +234,13 @@ function Shoppingcart(){
           <div className=" w-1/3   bg-white-300">
           <div className='pl-5 p-2 mb-3 flex items-center space-x-2'>
                 <label className='text-slate-800 font-serif'>Select Food Category :</label>
-                <select className='text-slate-600 font-serif block mb-3 mt-5 w-52 p-2 border border-slate-300 rounded-lg' required>
+                <select className='text-slate-600 font-serif block mb-3 mt-5 w-52 p-2 border border-slate-300 rounded-lg' value={categoryid1} onChange={handleCategoryID2} required>
                 <option value="">select category</option>
+                {categories.map(function (category){
+                    return(
+                        <option value={category.id}>{category.name}</option>
+                    )
+                } )}
                 </select>
             </div>
 
@@ -215,32 +249,27 @@ function Shoppingcart(){
             <div className="overflow-y-auto max-h-custom  px-2">
             <div className="-mb-2 p-1">
             {/* map function */}
-            <div className="border border-slate-500 rounded-lg p-2 mb-3">
-                <div >
-            <img src={chikenrice} alt='chiken rice' className="h-16 w-16 rounded-lg mr-3 justify-center"  	/>
-
-                <div className='-mt-12'>
-                <div className="text-xl font-serif text-slate-800 text-right">chiken Rice </div>
-                <div className="text-sm text-slate-400 text-right"> Rs.850.00</div>
-                </div>
-                </div>
-            </div>
-
-           </div>
-           <div className="-mb-2 p-1">
-            {/* map function */}
-            <div className="border border-slate-500 rounded-lg p-2 mb-3">
-                <div >
-            <img src={chikenrice} alt='chiken rice' className="h-16 w-16 rounded-lg mr-3 justify-center"  	/>
-
-                <div className='-mt-12'>
-                <div className="text-xl font-serif text-slate-800 text-right">chiken Rice </div>
-                <div className="text-sm text-slate-400 text-right"> Rs.850.00</div>
-                </div>
+            {categoryIdAsNumber1 == null ? (
+    <div>Please select a category.</div>
+) : citems1 && citems1.length > 0 ? (
+    citems1.map(function (item) {
+        return (
+            <div key={item.id} className="border border-slate-500 rounded-lg p-2 mb-3">
+                <div>
+                    <img src={chikenrice} alt="chiken rice" className="h-16 w-16 rounded-lg mr-3 justify-center" />
+                    <div className="-mt-12">
+                        <div className="text-xl font-serif text-slate-800 text-right">{item.name}</div>
+                        <div className="text-sm text-slate-400 text-right">{item.price}</div>
+                    </div>
                 </div>
             </div>
-
+        );
+    })
+) : (
+    <div>No items found in this category.</div>
+)}
            </div>
+         
 
           </div>
             </div>
