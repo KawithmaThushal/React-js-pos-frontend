@@ -11,7 +11,23 @@ function AddProduct(){
     const [categoryID, setCategoryId] = useState<number>();
     const[categories , setcategories] = useState<categoryType[]>([]);
     const [editproduct,setEditProduct] = useState<ProductsType | null>(null);
+    const [productImage, setProductImage] = useState<File | null>(null); // State for product image
+    const [existingImageURL, setExistingImageURL] = useState<string | null>(null); 
+    const [viewType, setViewType] = useState("products");
+    const [foodType, setFoodType] = useState<string>(""); 
 
+
+
+
+   
+
+    useEffect(() => {
+      if (viewType === "products") {
+        loadpreFood();
+      } else {
+        loadDayFood();
+      }
+    }, [viewType]);
 
 
       
@@ -36,6 +52,11 @@ function AddProduct(){
       setCategoryId(e.target.value);
   }
 
+  function handlefoodType(e:any){
+    setFoodType(e.target.value);
+}
+ 
+
   async function loadCategory() {
     try {
        const respones = await axios.get("http://localhost:8081/Categery");
@@ -57,9 +78,27 @@ function AddProduct(){
 
   
 
-    async function loadProducts() {
+    // async function loadProducts() {
+    //   try {
+    //     const respones= await axios.get(`http://localhost:8081/Product`);
+    //     setProducts(respones.data);
+    //   } catch (error) {
+    //     console.error("Error loading categories:", error);
+    //     if (axios.isAxiosError(error)) {
+    //         console.error("Axios error details:", error.response);
+    //         if (error.response?.status === 403) {
+    //             console.error("Forbidden! You are not authorized to access this resource.");
+    //         } else if (error.response?.status === 401) {
+    //             console.error("Unauthorized! Check your JWT token.");
+    //         }
+    //     }
+        
+    //   }
+    // }
+
+    async function loadpreFood() {
       try {
-        const respones= await axios.get(`http://localhost:8081/Product`);
+        const respones= await axios.get(`http://localhost:8081/Product?foodType=pre Food`);
         setProducts(respones.data);
       } catch (error) {
         console.error("Error loading categories:", error);
@@ -74,17 +113,40 @@ function AddProduct(){
         
       }
     }
+
+
+
+    async function loadDayFood() {
+      try {
+        const respones= await axios.get(`http://localhost:8081/Product?foodType=Day Food`);
+        setProducts(respones.data);
+      } catch (error) {
+        console.error("Error loading categories:", error);
+        if (axios.isAxiosError(error)) {
+            console.error("Axios error details:", error.response);
+            if (error.response?.status === 403) {
+                console.error("Forbidden! You are not authorized to access this resource.");
+            } else if (error.response?.status === 401) {
+                console.error("Unauthorized! Check your JWT token.");
+            }
+        }
+        
+      }
+    }
+
     useEffect(function() {
-      loadProducts();
+      // loadProducts();
     },[])
     useEffect(function(){
-      loadProducts();
+      // loadProducts();
       loadCategory();
     } ,[])
 
     async function creatProduct() {
       const data={
         productname: productName,
+        foodType:foodType,
+        image:productImage,
         categoryId:categoryID
       }
       try {
@@ -116,14 +178,17 @@ function AddProduct(){
     async function updateProduct() {
       const data={
         productname: productName,
+        foodType:foodType,
+        image:productImage,
         categoryId:categoryID
       }
       try {
         await axios.put(`http://localhost:8081/Product/${editproduct?.id}`,data);
         setEditProduct(null);
-        loadProducts();
+        // loadProducts();
         setproductName("");
         setCategoryId(0);
+        setFoodType("");
       } catch (error) {
         console.error("Error loading categories:", error);
         if (axios.isAxiosError(error)) {
@@ -138,6 +203,60 @@ function AddProduct(){
       }
       
     }
+
+    async function deleteProduct(id:number) {
+      try {
+        await axios.delete(`http://localhost:8081/Product/${id}`)
+        loadDayFood();loadpreFood();
+        
+      } catch (error) {
+        console.error("Error loading categories:", error);
+        if (axios.isAxiosError(error)) {
+            console.error("Axios error details:", error.response);
+            if (error.response?.status === 403) {
+                console.error("Forbidden! You are not authorized to access this resource.");
+            } else if (error.response?.status === 401) {
+                console.error("Unauthorized! Check your JWT token.");
+            }
+        }
+      }
+      
+    }
+
+     
+
+    function handleAddCategoryClick(){
+      navigate("/product/Category");
+  }
+
+  
+
+  function handleAddStockClick(){
+  navigate("/product/Stock");
+
+  }
+  function handleDaliyKitchenClick(){
+    navigate("/product/DaliyKitchen");
+  
+    }
+
+    function handleSuplyerClick(){
+      navigate("/product/Supplyer");
+    
+      }
+
+
+    function handleProductImage(e: React.ChangeEvent<HTMLInputElement>) {
+      if (e.target.files && e.target.files[0]) {
+        setProductImage(e.target.files[0]); // Store the selected image file
+      }
+    }
+
+    function handleViewChange(e: React.ChangeEvent<HTMLSelectElement>) {
+      setViewType(e.target.value); // Update the view type
+    }
+  
+
    
 
     return(
@@ -202,10 +321,20 @@ function AddProduct(){
               <div className="w-10 h-10 rounded-full bg-gray-300"></div>
             </div>
           </div>
+          <div className="m-5">
+          <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 font-serif" onClick={handleDaliyKitchenClick}>Daliy Kitchen </button>
+          <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 font-serif" onClick={handleAddCategoryClick} >Add Category</button>
+          <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 font-serif" onClick={handleAddStockClick}>Add Stock</button>
+          <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 font-serif" onClick={handleSuplyerClick}>Supplyer  </button>
+
+
+
+          </div>
+
           <div className="flex p-6 space-x-8">
       {/* Form Section */}
       <div className="w-1/2 h-[450px] space-y-4 p-6 bg-white shadow-lg rounded-lg">
-      <h3 className="text-lg font-semibold mb-4 font-serif">Add Product</h3>
+      <h3 className="text-lg font-semibold mb-4 font-serif">{editproduct? "Edit Product" :"Add Prodcut"}</h3>
   <div>
     <label className="block text-sm font-semibold text-gray-700 font-serif">Product Name</label>
     <input
@@ -231,6 +360,44 @@ function AddProduct(){
       })}
     </select>
   </div>
+
+  <div>
+          <label className="block text-sm font-semibold text-gray-700 font-serif">Food Type</label>
+          <select
+            value={foodType}
+            onChange={handlefoodType}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 font-serif">
+            <option value="Day Food">Day Food</option>
+            <option value="pre Food">pre Foods</option>
+          </select>
+        </div>
+
+  <div>
+              <label className="block text-sm font-semibold text-gray-700 font-serif">
+                Product Image
+              </label>
+              <input
+              value={productImage}
+                type="file"
+                accept="image/*"
+                onChange={handleProductImage}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 font-serif"
+              />
+
+              {/* Show existing image if editing */}
+              {existingImageURL && (
+                <div className="mt-4">
+                  <p className="text-sm text-gray-600 font-serif">Current Image:</p>
+                  <img
+                    src={existingImageURL}
+                    alt="Product"
+                    className="w-32 h-32 object-cover rounded-lg"
+                  />
+                </div>
+              )}
+            </div>
+
+
   {editproduct?(
     <>
      <div className="flex justify-center">
@@ -250,10 +417,20 @@ function AddProduct(){
 </div>
 
       {/* Table Section */}
-      <div className="w-1/2 h-[600px] bg-white rounded-lg shadow-md p-4 overflow-hidden">
-      <h3 className="text-lg font-semibold mb-4 font-serif">Product List</h3>
+      <div className="w-1/2 h-[530px] bg-white rounded-lg shadow-md p-4 overflow-hidden">
+      <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold font-serif">Product List</h3>
+              <select
+                value={viewType}
+                onChange={handleViewChange}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 font-serif"
+              >
+                <option value="pre Food">Pre Foods</option>
+                <option value="Day Food">Day Foods</option>
+              </select>
+            </div>
       <div className="overflow-x-auto">
-    <div className="max-h-[600px] overflow-y-auto">
+    <div className="max-h-[480px] overflow-y-auto">
         <table className="w-full text-left border-collapse font-serif">
           <thead className="bg-gray-100 border-b-2 border-gray-200">
             <tr>
@@ -275,7 +452,8 @@ function AddProduct(){
                   onClick={() => productEditing(product)}>
                     Edit
                   </button>
-                  <button className="text-white bg-red-500 hover:bg-red-600 px-3 py-1 rounded-lg text-sm focus:ring-2 focus:ring-red-300">
+                  <button className="text-white bg-red-500 hover:bg-red-600 px-3 py-1 rounded-lg text-sm focus:ring-2 focus:ring-red-300"
+                   onClick={() => deleteProduct(product.id)}>
                     Delete
                   </button>
                 </td>

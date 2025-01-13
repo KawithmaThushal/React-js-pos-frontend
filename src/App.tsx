@@ -12,7 +12,9 @@ import Payment from './page/Payment'
 import AddCategory from './page/Product/AddCategory'
 import AddProduct from './page/Product/AddProduct'
 import AddStock from './page/Product/AddStock'
+import DaliyKitchen from './page/Product/DaliyKitchen'
 import Product from './page/Product/Product'
+import Supplyer from './page/Product/Supplyer'
 import Shoppingcart from './page/ShopingChar'
 
 function App() {
@@ -32,6 +34,10 @@ function App() {
       <Route path="/product/Category" element={<AddCategory/>}/>
       <Route path="/product/Products" element={<AddProduct/>}/>
       <Route path="/product/Stock" element={<AddStock/>}/>
+      <Route path="/product/DaliyKitchen" element={<DaliyKitchen/>}/>
+      <Route path="/product/Supplyer" element={<Supplyer/>}/>
+
+
 
 
 

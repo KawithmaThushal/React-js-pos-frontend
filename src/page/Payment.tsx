@@ -1,8 +1,60 @@
-import { useNavigate } from "react-router-dom"
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 function Payment(){
 
-  const navigate =useNavigate()
+  const navigate =useNavigate();
+  const location = useLocation();
+  const [serviceCharge, setServiceCharge]= useState<number>(0);
+  const [discount, setDiscount]= useState<number>(0);
+  const [Cash, setCash]= useState<number>(0);
+  const [balance, setBalance] = useState<number>(0);
+  const [isTable, setTable] = useState(false);
+  const [isTakeAway, setIsTakeAway] = useState(false);
+
+  
+
+
+  const { orderDetails = [], totalQuantity = 0, totalAmount = 0 } =
+  location.state || {};
+
+  const [paymentAmount, setPaymentAmount] = useState<number>(totalAmount);
+
+
+  useEffect(()=>{
+    const calculatePayementamount= Number(totalAmount) + Number(serviceCharge) - Number(discount);
+    setPaymentAmount(calculatePayementamount> 0 ? calculatePayementamount : 0);
+
+  },[serviceCharge,discount,totalAmount]);
+
+  useEffect(() =>{
+    setBalance(Cash-paymentAmount);
+  },[Cash,paymentAmount]);
+
+  function clearoder(){
+    setBalance(0);
+    setCash(0);
+    setDiscount(0);
+    setPaymentAmount(0);
+    setServiceCharge(0);
+    totalQuantity(0);
+    totalAmount(0);
+    orderDetails[0];
+    setBalance(0);
+    
+  }
+
+function handleServiceCharge(e:any){
+  setServiceCharge(e.target.value);
+}
+
+function handleDiscount(e:any){
+  setDiscount(e.target.value);
+}
+
+function handleBalnce(e:any){
+  setCash(e.target.value);
+}
 
 
 
@@ -82,78 +134,156 @@ navigate("/dashboard")
             <div className="w-10 h-10 rounded-full bg-gray-300"></div>
           </div>
         </div>
-
-
-            
-          <div className="p-6 text-center text-4xl font-serif">
-            <span>Select Payment Method</span>
+                   
+          <div className="flex justify-center items-start bg-gray-50 py-6">
+          <div className="flex w-[1200px] h-[620px] bg-white p-6 rounded-lg shadow-md gap-8">
+            {/* Left Section */}
+            <div className="w-[400px] bg-white border border-blue-500 rounded-lg p-5 shadow-md">
+        <h1 className="text-center text-lg font-bold text-gray-800">POS</h1>
+        <div className="mt-4">
+          <p className="text-sm font-semibold text-gray-600">
+            Order Id: <span className="font-normal text-black">#25689</span>
+          </p>
+          <div className="flex justify-between mt-4">
+            <p className="text-base font-semibold text-gray-800">Items</p>
+            <p className="text-base font-semibold text-gray-800">Price</p>
           </div>
-        
-          <div className="flex justify-center items-center  bg-gray-50">
-  <div className="bg-white mx-6 p-6 rounded-lg w-3/4 shadow-md">
-    {/* Select Payment Method */}
-    <div className="text-center mb-4">
-      <div className="flex justify-center ">
-        <button className="px-6 py-2 bg-gray-200 text-gray-700 font-serif rounded-l-lg border border-gray-300 hover:bg-cyan-200 focus:bg-cyan-300 font-serif">
-          Cash
-        </button>
-        <button className=" font-serif px-6 py-2 bg-gray-200 text-gray-700 rounded-r-lg border border-gray-300 hover:bg-cyan-200 focus:bg-cyan-300 font-serif">
-          Card
-        </button>
+          <hr className="my-2" />
+          <div className="h-[200px] overflow-y-scroll">
+          {orderDetails.map((item, index) => (
+          <div
+            key={index}
+            className="flex justify-between"          >
+              <p className="text-sm font-medium text-gray-700">{item.name}</p>
+              <p className="text-sm font-medium text-gray-700">{item.price}</p>
+            </div>
+       
+        ))}
+
+             
+            </div>
+          <hr className="my-4" />
+          <div className="text-sm space-y-2">
+            <p className="flex justify-between">
+              <span>Item Quantity</span> <span>{totalQuantity}</span>
+            </p>
+            <p className="flex justify-between">
+              <span>Service Charge</span> <span>{serviceCharge}</span>
+            </p>
+            <p className="flex justify-between">
+              <span>Discount</span> <span>{discount}</span>
+            </p>
+            <p className="flex justify-between">
+              <span>Payment Amount</span> <span>{paymentAmount}</span>
+            </p>
+            <p className="flex justify-between">
+              <span>Cash</span> <span>{Cash}</span>
+            </p>
+            <p className="flex justify-between">
+              <span>Balance</span> <span>{balance}</span>
+            </p>
+          </div>
+        </div>
       </div>
-    </div>
+            {/* Right Section */}
+            <div className="flex flex-col w-1/2 p-6 bg-slate-50 rounded-lg shadow-md ml-16">
+                {/* Order ID */}
+                <div className="text-center mb-4">
+                  <p className="text-lg font-medium">Order Id: <span className="font-bold">#25689</span></p>
+                </div>
 
-    {/* Order Details */}
-    <div >
-    <h3 className="text-lg font-bold font-serif mb-4">Order Number   #545</h3>
-    <div className="mb-4  " >
-      <label className="block text-gray-700 font-serif font-medium">Item Quantity</label>
-      <input
-        type="text"
-        readOnly
-        className="w-5/12 mt-1 px-4 py-2 font-serif border rounded-lg focus:ring focus:ring-cyan-300 bg-gray-100"
-        placeholder="Quantity"
-      />
-    </div>
-    <div className="mb-4">
-      <label className="block text-gray-700 font-serif">Service Charge</label>
-      <input
-        type="text"
-        className="w-5/12 mt-1 px-4 py-2 border font-serif rounded-lg focus:ring focus:ring-cyan-300 bg-gray-100"
-        placeholder="Enter Service Charge"
-      />
-    </div>
-    <div className="mb-4">
-      <label className="block text-gray-700 font-serif">Subtotal</label>
-      <input
-        type="text"
-        readOnly
-        className="w-5/12 mt-1 px-4 py-2 border rounded-lg bg-gray-100 font-serif"
-        value="Rs. 500.00"
-      />
-    </div>
-    <div className="mb-4">
-      <label className="block text-gray-700 font-serif">Total</label>
-      <input
-        type="text"
-        className="w-5/12 mt-1 px-4 py-2 border rounded-lg focus:ring focus:ring-cyan-300 font-serif"
-        placeholder="Rs. 500.00"
-      />
-    </div>
+                {/* Item Quantity */}
+                <div className="flex justify-between items-center mb-4">
+                  <p className="font-medium">Item Quantity:</p>
+                  <p className="font-medium">{totalQuantity}</p>
+                </div>
 
-    {/* Action Buttons */}
-    <div className="flex justify-center ">
-      <button className="mx-3 px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-zinc-600 font-serif">
-        Cancel Order
-      </button>
-      <button className="px-6 py-2 bg-gray-500 text-white rounded-lg hover:bg-zinc-600 font-serif">
-        Confirm Order
-      </button>
-    </div>
-    </div>
-  </div>
-  </div>
+                {/* Subtotal */}
+                <div className="flex justify-between items-center mb-4">
+                  <p className="font-medium">Sub Total:</p>
+                  <p className="font-medium"> Rs {totalAmount.toFixed(2)}</p>
+                </div>
 
+                {/* Service Charge */}
+                <div className="mb-4">
+                  <label className="block font-medium text-gray-700 mb-1">Service Charge</label>
+                  <input
+                    type="text"
+                    value={serviceCharge}
+                    onChange={handleServiceCharge}
+                    className="w-full px-4 py-2 border rounded-md focus:ring focus:ring-green-200"
+                    placeholder="Enter service charge"
+                  />
+                </div>
+
+                {/* Discount */}
+                <div className="mb-4">
+                  <label className="block font-medium text-gray-700 mb-1">Discount:</label>
+                  <input
+                    type="text"
+                    value={discount}
+                    onChange={handleDiscount}
+                    className="w-full px-4 py-2 border rounded-md focus:ring focus:ring-green-200"
+                    placeholder="Enter discount"
+                  />
+                </div>
+
+                {/* Payment Amount */}
+                <div className="flex justify-between items-center mb-4">
+                  <p className="font-medium">Payment Amount</p>
+                  <p className="font-medium">Rs :{paymentAmount}</p>
+                </div>
+
+                {/* Cash */}
+                <div className="mb-4">
+                  <label className="block font-medium text-gray-700 mb-1">Cash</label>
+                  <input
+                    type="text"
+                    value={Cash}
+                    onChange={handleBalnce}
+                    className="w-full px-4 py-2 border rounded-md focus:ring focus:ring-green-200"
+                    placeholder="Enter cash amount"
+                  />
+                </div>
+
+                {/* Balance */}
+                <div className="flex justify-between items-center mb-6">
+                  <div className="flex items-center space-x-2">
+                    <label className="font-medium">Balance</label>
+                    <input
+                      type="text"
+                      readOnly
+                      className="w-40 px-2 py-1 border bg-gray-100 rounded-md"
+                      value={balance}
+                    />
+                  </div>
+                  <div className="flex items-center space-x-4">
+                    <label className="font-medium">Table</label>
+                    <input type="checkbox" 
+                    checked={isTable} onChange={(e)=> setTable(e.target.checked)} className="w-5 h-5 border rounded-md" />
+                    <label className="font-medium">Take Away</label>
+                    <input  checked={isTakeAway} onChange={(e)=> setIsTakeAway(e.target.checked)}
+                     type="checkbox" className="w-5 h-5 border rounded-md" />
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex justify-around">
+                  <button className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                    Print Invoice
+                  </button>
+                  <button onClick={clearoder} className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                    Clear Order
+                  </button>
+                  <button className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                    Confirm Order
+                  </button>
+                </div>
+                    </div>
+
+
+          </div>
+        </div>
         </div>
         </div>
     )

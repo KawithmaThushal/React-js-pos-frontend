@@ -29,6 +29,10 @@ navigate("/dashboard")
   function handleaddcategory(e:any){
     setCategoryName(e.target.value);
   }
+  function handleDaliyKitchenClick(){
+    navigate("/product/DaliyKitchen");
+  
+    }
 
   async function loadCategory() {
     try {
@@ -55,6 +59,7 @@ navigate("/dashboard")
     }
     try {
       await axios.post("http://localhost:8081/Categery",data);
+      loadCategory() ;
     } catch (error) {
       console.error("Error loading categories:", error);
       if (axios.isAxiosError(error)) {
@@ -123,6 +128,22 @@ navigate("/dashboard")
     loadCategory();
   },[])
 
+  function handleAddProductClick(){
+    navigate("/product/Products");
+}
+
+function handleAddStockClick(){
+  navigate("/product/Stock");
+
+  }
+
+  function handleSuplyerClick(){
+    navigate("/product/Supplyer");
+  
+    }
+
+
+
         
     return(
         <div className="flex h-screen">
@@ -186,16 +207,33 @@ navigate("/dashboard")
               <div className="w-10 h-10 rounded-full bg-gray-300"></div>
             </div>
           </div>
+          <div className="bg-gray-100 py-4 px-6 shadow-sm">
+          <h3 className="text-lg font-semibold font-serif text-gray-700">
+            Manage Category  products.
+          </h3>
+          <p className="text-sm text-gray-500 font-serif">
+          Category add,Edit,Delete  availability directly from this dashboard.
+          </p>
+        </div>
+          <div className="m-2">
+          <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 font-serif" onClick={handleDaliyKitchenClick}>Daliy Kitchen </button>
+          <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 font-serif"  onClick={handleAddProductClick}>Add Product</button>
+          <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 font-serif" onClick={handleAddStockClick}>Add Stock</button>
+          <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 font-serif" onClick={handleSuplyerClick}>Supplyer  </button>
 
-          <div className="flex flex-col items-center justify-center  p-6 space-y-6">
-  <div className="p-2 text-center text-3xl font-serif">
-    <span>Create Category</span>
+
+          </div>
+
+
+          <div className="flex flex-col items-center justify-center  p-1 space-y-6">
+  <div className="p-1 text-center text-3xl font-serif">
+    <span>{editCategory?"Update Category":"Create Category"}</span>
   </div>
   {/* Part 1: Input Box */}
   <div className="w-[500px] bg-white shadow-md p-6 rounded-lg flex flex-col space-y-4">
     {/* Input Field */}
     <div className="flex justify-between items-center">
-      <label className="text-lg font-serif font-semibold mr-4">Enter Category</label>
+      <label className="text-lg font-serif font-semibold mr-2">Enter Category</label>
       <input
       value={CategeryName}
       onChange={handleaddcategory}
@@ -234,9 +272,9 @@ navigate("/dashboard")
    
   </div>
 </div>
-<div className="w-[70%] mx-auto mt-6 bg-white shadow-md rounded-lg overflow-hidden">
+<div className="w-[70%] mx-auto mt-2 bg-white shadow-md rounded-lg overflow-hidden">
   <div className="overflow-x-auto">
-    <div className="max-h-[350px] overflow-y-auto"> {/* Set a maximum height and enable vertical scrolling */}
+    <div className="max-h-[270px] overflow-y-auto"> {/* Set a maximum height and enable vertical scrolling */}
       <table className="w-full text-left border-collapse font-serif">
         <thead className="bg-gray-100 border-b-2 border-gray-200">
           <tr>

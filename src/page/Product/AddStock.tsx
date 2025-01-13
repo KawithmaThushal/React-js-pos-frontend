@@ -1,8 +1,27 @@
-import { useNavigate } from "react-router-dom"
+import axios from "axios";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import DayFoodType from "../../Type/DayFoodType";
+import ProductsType from "../../Type/ProductsType";
+import StockType from "../../Type/StockType";
 
 function AddStock(){
 
-    const navigate =useNavigate()
+    const navigate =useNavigate();
+    const[products , setProducts] = useState<ProductsType[]>([]);
+    const[stock , setStock] = useState<StockType[]>([]);
+    const[DayFood , setDayFood] = useState<DayFoodType[]>([]);
+
+
+    const[quantiy,setquantity] =useState<number>(0);
+    const[productId,setproductID] =useState<number>(0);
+
+    const [expireDate,setExpireDate] = useState<Date>();
+    const [price, setPrice] = useState<number>(0);
+    const [foodType, setFoodType] = useState<string>("Pre Food");
+    const [viewType, setViewType] = useState<string>("Pre Food");
+
+
 
 
       
@@ -18,6 +37,184 @@ navigate("/product")
 function clickHome(){
 navigate("/dashboard")
 }
+
+function handleProductid(e:any){
+  setproductID(e.target.value);
+}
+
+function handlequantitiy(e:any){
+    setquantity(e.target.value);
+}
+
+function handleExpireDate(e:any){
+  setExpireDate(e.target.value);
+}
+
+function handleProductPrice(e:any) {
+  setPrice(Number(e.target.value));
+}
+
+
+function handleAddCategoryClick(){
+  navigate("/product/Category");
+}
+
+function handleAddProductClick(){
+navigate("/product/Products");
+}
+
+
+function handleDaliyKitchenClick(){
+navigate("/product/DaliyKitchen");
+
+}
+
+function handleSuplyerClick(){
+  navigate("/product/Supplyer");
+
+  }
+
+  function handleFoodTypeChange(e: any) {
+    setFoodType(e.target.value);
+  }
+  function handleFoodViewType(e: any) {
+    setViewType(e.target.value);
+  }
+
+
+
+async function loadProducts() {
+  try {
+    const respones= await axios.get(`http://localhost:8081/Product`)
+    setProducts(respones.data);
+    console.log(respones.data);
+  } catch (error) {
+
+    console.error("Error loading categories:", error);
+    if (axios.isAxiosError(error)) {
+        console.error("Axios error details:", error.response);
+        if (error.response?.status === 403) {
+            console.error("Forbidden! You are not authorized to access this resource.");
+        } else if (error.response?.status === 401) {
+            console.error("Unauthorized! Check your JWT token.");
+        }
+    }
+    
+  }
+}
+
+async function creatStock() {
+  const data={
+    quaitiy:quantiy,
+    expireDate:expireDate,
+    productid:productId,
+    price:price
+
+  }
+  try {
+    await axios.post(`http://localhost:8081/Stock`,data);
+    loadStock();
+  } catch (error) {
+    console.error("Error loading categories:", error);
+    if (axios.isAxiosError(error)) {
+        console.error("Axios error details:", error.response);
+        if (error.response?.status === 403) {
+            console.error("Forbidden! You are not authorized to access this resource.");
+        } else if (error.response?.status === 401) {
+            console.error("Unauthorized! Check your JWT token.");
+        }
+    }
+  }
+}
+
+async function loadStock() {
+  try {
+  const respones=  await axios.get(`http://localhost:8081/Stock`);
+  setStock(respones.data);
+  } catch (error) {
+    console.error("Error loading categories:", error);
+    if (axios.isAxiosError(error)) {
+        console.error("Axios error details:", error.response);
+        if (error.response?.status === 403) {
+            console.error("Forbidden! You are not authorized to access this resource.");
+        } else if (error.response?.status === 401) {
+            console.error("Unauthorized! Check your JWT token.");
+        }
+    }
+    
+  }
+}
+
+async function loadDayFood() {
+  try {
+  const respones=  await axios.get(`http://localhost:8081/DStock`);
+  setDayFood(respones.data);
+  } catch (error) {
+    console.error("Error loading categories:", error);
+    if (axios.isAxiosError(error)) {
+        console.error("Axios error details:", error.response);
+        if (error.response?.status === 403) {
+            console.error("Forbidden! You are not authorized to access this resource.");
+        } else if (error.response?.status === 401) {
+            console.error("Unauthorized! Check your JWT token.");
+        }
+    }
+    
+  }
+}
+
+
+async function createDayFood() {
+ 
+  const data = {
+    productId,
+    price,
+  };
+  try {
+    await axios.post(`http://localhost:8081/DStock`, data);
+    loadDayFood();
+    } catch (error) {
+    console.error("Error adding Day Food stock:", error);
+  }
+}
+
+
+
+
+
+async function deleteStockPre(id:number) {
+  try {
+    await axios.delete(`http://localhost:8081/Stock/${id}`);
+    loadStock() ;
+
+  } catch (error) {
+    console.error("Error deleting stock:", error);
+    if (axios.isAxiosError(error) && error.response) {
+      console.error("Axios error:", error.response.data);
+    }
+  }
+  
+}
+
+async function deleteStockDay(id:number) {
+  try {
+    await axios.delete(`http://localhost:8081/DStock/${id}`);
+    loadDayFood() ;
+
+  } catch (error) {
+    console.error("Error deleting stock:", error);
+    if (axios.isAxiosError(error) && error.response) {
+      console.error("Axios error:", error.response.data);
+    }
+  }
+  
+}
+
+useEffect(function(){
+  loadProducts();
+  loadStock() ;
+  loadDayFood();
+},[]);
     return(
         <div className="flex h-screen">
         {/* Sidebar */}
@@ -83,85 +280,225 @@ navigate("/dashboard")
 
           </div>
 
+          <div className="m-5">
+          <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 font-serif" onClick={handleDaliyKitchenClick}>Daliy Kitchen </button>
+          <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 font-serif" onClick={handleAddCategoryClick} >Add Category</button>
+          <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 font-serif"  onClick={handleAddProductClick}>Add Product</button>
+          <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800 font-serif" onClick={handleSuplyerClick}>Supplyer  </button>
 
-          <div className="flex space-x-4 py-6 px-6">
+
+
+          </div>
+
+
+          <div className="flex space-x-5 py-6 px-6">
     {/* Form Section */}
-    <div className="w-1/2 bg-white p-6 shadow-md rounded-lg">
-      <h3 className="text-lg font-semibold mb-4 font-serif">Add Stock</h3>
+    <div className="w-1/2 h-[520px] bg-white p-6 shadow-md rounded-lg">
+            <h3 className="text-lg font-semibold font-serif mb-4">Add Stock</h3>
 
-      {/* Product Name */}
-      <div className="mb-4">
-        <label className="block text-sm font-semibold text-gray-700 font-serif">Product Name</label>
-        <select
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 font-serif"
-        >
-          <option>Select Product</option>
-          <option>Electronics</option>
-          <option>Clothing</option>
-          <option>Furniture</option>
-          <option>Groceries</option>
-        </select>
-      </div>
+            {/* Food Type Dropdown */}
+            <div className="mb-4">
+              <label className="block text-sm font-semibold font-serif text-gray-700">Food Type</label>
+              <select
+                onChange={handleFoodTypeChange}
+                className="w-full px-4 py-1 border border-gray-300 rounded-lg font-serif focus:outline-none focus:ring-2 focus:ring-blue-300"
+              >
+                <option value="Pre Food">Pre Food</option>
+                <option value="Day Food">Day Food</option>
+              </select>
+            </div>
 
-      {/* Quantity */}
-      <div className="mb-4">
-        <label className="block text-sm font-semibold text-gray-700 font-serif">Quantity</label>
-        <input
-          type="number"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 font-serif"
-          placeholder="Enter Quantity"
-        />
-      </div>
+            {/* Product Name */}
+            <div className="mb-4">
+              <label className="block text-sm font-serif font-semibold text-gray-700">Product Name</label>
+              <select
+              value={productId}
+                onChange={handleProductid}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg font-serif focus:outline-none focus:ring-2 focus:ring-blue-300"
+              >
+                <option>Select Product</option>
+                {products.map((product) => (
+                  <option key={product.id} value={product.id}>
+                    {product.productname}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-      {/* Expiry Date */}
-      <div className="mb-4">
-        <label className="block text-sm font-semibold text-gray-700 font-serif">Expire Date</label>
-        <input
-          type="date"
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 font-serif"
-        />
-      </div>
+            {/* Dynamic Fields Based on Food Type */}
+            {foodType === "Pre Food" && (
+              <>
+                {/* Quantity */}
+                <div className="mb-4">
+                  <label className="block text-sm font-serif font-semibold text-gray-700">Quantity</label>
+                  <input
+                    onChange={handlequantitiy}
+                    type="number"
+                   value={quantiy}
+                    className="w-full px-4 py-2 border border-gray-300 font-serif rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    placeholder="Enter Quantity"
+                  />
+                </div>
 
-      {/* Add Stock Button */}
-      <div className="flex justify-center">
-        <button className="bg-blue-500 text-white py-2 px-6 rounded-lg hover:bg-blue-600 font-serif">
-          Add Stock
-        </button>
-      </div>
-    </div>
+                {/* Expire Date */}
+                <div className="mb-4">
+                  <label className="block text-sm font-semibold font-serif text-gray-700">Expire Date</label>
+                  <input
+                   onChange={handleExpireDate}
+                    type="date"
+                    value={expireDate ? expireDate.toString() : ""}
+                    className="w-full font-serif px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-serif font-semibold text-gray-700">Price</label>
+                  <input
+                    onChange={handleProductPrice}
+                    type="number"
+                    value={price}
+                    className="w-full px-4 py-2 border font-serif border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    placeholder="Enter Price"
+                  />
+                </div>
+
+                <div className="flex justify-center">
+                  <button
+                   onClick={creatStock}
+                    className="bg-blue-500 font-serif text-white py-2 px-6 rounded-lg hover:bg-blue-600"
+                  >
+                    Add Pre Stock
+                  </button>
+                </div>
+              </>
+            )}
+
+        {foodType === "Day Food" && (
+              <>
+                {/* Price */}
+                <div className="mb-4">
+                  <label className="block text-sm font-semibold font-serif text-gray-700">Price</label>
+                  <input
+                    onChange={handleProductPrice}
+                    type="number"
+                    value={price}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    placeholder="Enter Price"
+                  />
+                </div>
+
+                <div className="flex justify-center">
+                  <button
+                  onClick={createDayFood}
+                    className="bg-blue-500 text-white font-serif py-2 px-6 rounded-lg hover:bg-blue-600"
+                  >
+                    Add Day Stock
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
 
     {/* Table Section */}
     <div className="w-1/2 bg-white p-4 shadow-md rounded-lg overflow-hidden">
     <div className="overflow-x-auto">
     <div className="max-h-[600px] overflow-y-auto">
-      <h3 className="text-lg font-semibold mb-4 font-serif">Stock List</h3>
-
-      <table className="w-full text-left border-collapse font-serif">
-        <thead className="bg-gray-100 border-b-2 border-gray-200">
-          <tr>
-            <th className="p-4 text-sm font-semibold text-gray-600">Stock ID</th>
+    <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold font-serif">Stock List</h3>
+        <select
+          value={viewType}
+         onChange={handleFoodViewType}
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 font-serif"
+        >
+          <option value="Pre Food">Pre Foods</option>
+          <option value="Day Food">Day Foods</option>
+        </select>
+      </div>
+    
+    { viewType == "Pre Food" && (
+          <table className="w-full text-left border-collapse font-serif">
+            <thead className="bg-gray-100 border-b-2 border-gray-200">
+            <tr>
+            <th className="p-4 text-sm font-semibold text-gray-600">Stock Price</th>
             <th className="p-4 text-sm font-semibold text-gray-600">Product Name</th>
             <th className="p-4 text-sm font-semibold text-gray-600">Quantity</th>
             <th className="p-4 text-sm font-semibold text-gray-600">Expire Date</th>
             <th className="p-4 text-sm font-semibold text-gray-600">Action</th>
           </tr>
-        </thead>
-        <tbody>
-          <tr className="hover:bg-gray-50">
-            <td className="p-4 text-sm text-gray-700">1</td>
-            <td className="p-4 text-sm text-gray-700">Electronics</td>
-            <td className="p-4 text-sm text-gray-700">50</td>
-            <td className="p-4 text-sm text-gray-700">2024-12-31</td>
+
+            </thead>
+            <tbody>
+          {stock.map(function(stock){
+            return(
+<tr className="hover:bg-gray-50">
+            <td className="p-4 text-sm text-gray-700">Rs.{stock.price}</td>
+            <td className="p-4 text-sm text-gray-700">{stock.product?.productname}</td>
+            <td className="p-4 text-sm text-gray-700">{stock.quaitiy}</td>
+            <td className="p-4 text-sm text-gray-700"> {stock.expireDate ? new Date(stock.expireDate).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })
+          : "N/A"}</td>
             <td className="p-4 text-sm text-gray-700 flex space-x-4">
              
-              <button className="text-white bg-red-500 hover:bg-red-600 px-3 py-1 rounded-lg text-sm">
+              <button 
+              
+              onClick={() => deleteStockPre(stock.id)}className="text-white bg-red-500 hover:bg-red-600 px-3 py-1 rounded-lg text-sm">
                 Delete
               </button>
             </td>
           </tr>
+            )
+          })}
+          
           {/* Additional rows can be added dynamically */}
         </tbody>
       </table>
+
+
+    )}
+      {/* Day Food */}
+
+{ viewType == "Day Food" && (
+          <table className="w-full text-left border-collapse font-serif">
+            <thead className="bg-gray-100 border-b-2 border-gray-200">
+            <tr>
+            <th className="p-4 text-sm font-semibold text-gray-600">Stock Price</th>
+            <th className="p-4 text-sm font-semibold text-gray-600">Product Name</th>
+            <th className="p-4 text-sm font-semibold text-gray-600">category</th>
+            <th className="p-4 text-sm font-semibold text-gray-600">Action</th>
+          </tr>
+
+            </thead>
+            <tbody>
+          {DayFood.map(function(dayFood){
+            return(
+<tr className="hover:bg-gray-50">
+            <td className="p-4 text-sm text-gray-700">Rs.{dayFood.price}</td>
+            <td className="p-4 text-sm text-gray-700">{dayFood.product?.productname}</td>
+            <td className="p-4 text-sm text-gray-700"> {dayFood.product?.category?.name}</td>
+            <td className="p-4 text-sm text-gray-700 flex space-x-4">
+             
+              <button 
+              
+              onClick={() => deleteStockDay(dayFood.id)}className="text-white bg-red-500 hover:bg-red-600 px-3 py-1 rounded-lg text-sm">
+                Delete
+              </button>
+            </td>
+          </tr>
+            )
+          })}
+          
+          {/* Additional rows can be added dynamically */}
+        </tbody>
+      </table>
+
+
+    )}
+
+
+
     </div>
   </div>
   </div>

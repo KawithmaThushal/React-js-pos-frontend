@@ -1,26 +1,99 @@
-import { useState } from 'react';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import chikenriceimg from '../assets/chiken.jpg';
+import DayFoodType from '../Type/DayFoodType';
+import StockType from '../Type/StockType';
 function Menu(){
 
   const navigate =useNavigate()
-  const [QuantityItem ,setquantity] = useState<number>(0);
+  const [selectedCategory, setSelectedCategory] = useState<string>("Breakfast");
+ // const [QuantityItem ,setquantity] = useState<number>(0);
+  const [brekfaset , setBreakfast] = useState<DayFoodType[]>([]);
+  const [lunch , setlunch] = useState<DayFoodType[]>([]);
+  const [Beverage , setBeverage] = useState<StockType[]>([]);
+  const [IceCream , setIceCreams] = useState<StockType[]>([]);
+  const [Shortets , setShortets] = useState<StockType[]>([]);
+  const [toatl , setTotal] = useState<number>(0.0);
 
-      function hnadleItemIncrease(){
-        setquantity(QuantityItem+1);
 
-      };
-      function hnadleItemdecrease(){
-        if(QuantityItem>0){
-          setquantity(QuantityItem-1);
-        }
+  const [orderPile, setOrderPile] = useState<any[]>([]);
 
-      };
 
-      function clearOrder(){
-       setquantity(0);
+  useEffect(() => {
+    const newTotal = orderPile.reduce(
+      (acc, item) => acc + item.quantity * item.price,
+      0
+    );
+    setTotal(newTotal);
+  }, [orderPile]);
+
+
+  const categories = ["Breakfast", "Lunch", "Beverage", "Short Eat", "Ice Cream"];
+
+  const handleDecreaseQuantity = (itemId: number) => {
+    setOrderPile((prevPile) =>
+      prevPile
+        .map((orderItem) =>
+          orderItem.id === itemId
+            ? { ...orderItem, quantity: orderItem.quantity - 1 }
+            : orderItem
+        )
+        .filter((orderItem) => orderItem.quantity > 0) // Remove items with quantity 0
+    );
+  };
+ 
+  const handleIncreaseQuantity = (itemId: number) => {
+    setOrderPile((prevPile) =>
+      prevPile.map((orderItem) =>
+        orderItem.id === itemId
+          ? { ...orderItem, quantity: orderItem.quantity + 1 }
+          : orderItem
+      )
+    );
+  };
+
+  const handleAddToOrder = (item: any) => {
+    setOrderPile((prevPile) => {
+      const existingItem = prevPile.find((orderItem) => orderItem.id === item.id);
+      if (existingItem) {
+        return prevPile.map((orderItem) =>
+          orderItem.id === item.id
+            ? { ...orderItem, quantity: orderItem.quantity + 1 }
+            : orderItem
+        );
       }
+      return [...prevPile, { ...item, quantity: 1 }];
+    });
+  };
 
+  const clearOrder = () => {
+    setOrderPile([]);
+    setTotal(0);
+  };
+
+  const handleConfirmOrder = () => {
+    const totalQuantity = orderPile.reduce((sum, item) => sum + item.quantity, 0);
+    const totalAmount = orderPile.reduce(
+      (sum, item) => sum + item.quantity * item.price,
+      0
+    );
+  
+    // Pass item names and their quantities along with total
+    const orderDetails = orderPile.map((item) => ({
+      name: item.product?.productname || item.name,
+      quantity: item.quantity,
+      price: item.price,
+    }));
+
+    navigate("/payment",{
+      state: {
+        orderDetails,
+        totalQuantity,
+        totalAmount,
+      },
+    })
+  }
     
 
       function clickMenu(){
@@ -36,6 +109,48 @@ function Menu(){
       navigate("/dashboard")
     }
 
+    
+
+        const getItemsToDisplay = () => {
+          switch (selectedCategory) {
+            case "Breakfast":
+              return brekfaset;
+            case "Lunch":
+              return lunch;
+            case "Beverage":
+              return Beverage;
+            case "Short Eat":
+              return Shortets;
+            case "Ice Cream":
+              return IceCream;
+            default:
+              return [];
+          }
+        };
+
+
+        useEffect(() => {
+          const fetchData = async () => {
+            try {
+              const responses = await Promise.all([
+                axios.get("http://localhost:8081/dayfood/breakfast"),
+                axios.get("http://localhost:8081/dayfood/lunch"),
+                axios.get("http://localhost:8081/dayfood/Beverage"),
+                axios.get("http://localhost:8081/dayfood/Shortets"),
+                axios.get("http://localhost:8081/dayfood/IceCream"),
+              ]);
+      
+              setBreakfast(responses[0].data);
+              setlunch(responses[1].data);
+              setBeverage(responses[2].data);
+              setShortets(responses[3].data);
+              setIceCreams(responses[4].data);
+            } catch (error) {
+              console.error("Error fetching data:", error);
+            }
+          };
+          fetchData();
+        }, []);
 
     return(
         <div className="flex h-screen">
@@ -100,12 +215,22 @@ function Menu(){
             </div>
           </div>
 
-          <div className="p-6">
-  {/* Select Category */}
-  <select className="border border-gray-300 rounded-md p-2 w-1/4 font-serif">
-    <option value="">Select Category</option>
-    {/* Add dynamic category options */}
-  </select>
+          <div className="p-3">
+          <div className="w-[750px] h-[55px] bg-gray-100 rounded-md shadow-md py-2 flex justify-around">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`w-[100px] h-[40px] py-2 px-2 rounded-2xl   font-serif ${
+                  selectedCategory === category
+                    ? "bg-rose-200 border-rose-100"
+                    : "bg-gray-100 hover:border-rose-400"
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
 
   <div
       className="mt-6 bg-white rounded-md shadow-md p-4  font-serif"
@@ -115,22 +240,27 @@ function Menu(){
         width:"800px" // Enable vertical scrolling
       }}
     >
-      <div className="grid grid-cols-3 gap-4 flex flex-wrap gap-4">
-        {Array.from({ length: 15 }, (_, i) => (
-          <div
-            key={i}
-            className="bg-white rounded-lg shadow-lg p-4 flex flex-col items-center"
-          >
-            <img
-              src={chikenriceimg} // Replace with dynamic image source
-              alt="Chicken Wings"
-              className="w-full h-28 object-cover rounded-md"
-            />
-            <h3 className="text-lg font-semibold mt-2  font-serif">CHICKEN WINGS</h3>
-            <p className="text-gray-500 text-sm font-serif">CATEGORY: N 🌶️</p>
-          </div>
-        ))}
-      </div>
+      <div className="grid grid-cols-3 gap-4">
+              {getItemsToDisplay().map((item, index) => (
+                <div
+                  key={index}
+                  className="bg-white rounded-lg shadow-lg p-4 flex flex-col items-center"
+                  onClick={() => handleAddToOrder(item)}
+                >
+                 <img
+        src={
+          item.product?.image
+            ? `http://localhost:8081/images/${item.product.image}` // Adjust to your server's image path
+            : chikenriceimg // Default fallback image
+        }
+        alt={item.product?.productname || "Item"}
+        className="w-full h-28 object-cover rounded-md"
+      />
+                  <h3 className="text-lg font-serif font-semibold mt-2">{item.product?.productname || "Item Name"}</h3>
+                  <p className="text-gray-500 font-semibold text-sm font-serif">Rs {item.price || "0.00"}</p>
+                </div>
+              ))}
+            </div>
     </div>
   </div>
 
@@ -140,23 +270,38 @@ function Menu(){
   <div className="flex flex-col bg-white mt-20 p-6 w-1/4 fixed right-0 h-full shadow-lg rounded-lg">
       <h3 className="text-lg font-bold mb-4 font-serif">ORDER</h3>
 
-      {/* Order Items */}
-      <div className="flex justify-between items-center mb-4">
-        <p className='font-serif'>Item 1 </p>
-        <p className='font-serif'>Rs 550.00 </p>
-
-        <div className="flex items-center space-x-2">
-          <button className="px-2 py-1 bg-gray-200 rounded font-serif" onClick={hnadleItemdecrease}>-</button>
-          <span>{QuantityItem}</span>
-          <button className="px-2 py-1 bg-gray-200 rounded font-serif" onClick={hnadleItemIncrease}>+</button>
-        </div>
-      </div>
+      <div className="h-[500px] overflow-y-auto">
+            {orderPile.map((orderItem, index) => (
+              <div
+                key={index}
+                className="flex justify-between items-center mb-4 bg-gray-100 rounded-lg p-2"
+              >
+                <p className="font-serif">{orderItem.product?.productname}</p>
+                <p className="font-serif">Rs {orderItem.price}</p>
+                <div className="flex items-center space-x-2">
+                  <button
+                    className="px-2 py-1 bg-gray-200 rounded font-serif"
+                    onClick={() =>handleDecreaseQuantity(orderItem.id)}
+                  >
+                    -
+                  </button>
+                  <span>{orderItem.quantity}</span>
+                  <button
+                    className="px-2 py-1 bg-gray-200 rounded font-serif"
+                    onClick={() => handleIncreaseQuantity(orderItem.id)}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+      
 
       {/* Add more items dynamically */}
       <hr className="my-4" />
-      <p className="mb-4 font-serif">Service Charge:</p>
-      <p className="font-bold mb-6 font-serif">Total:</p>
-      <button className="bg-green-500 hover:bg-green-400  text-white py-2 px-4 rounded-lg hover:bg-green-600 font-serif">
+      <p className="font-bold mb-6 font-serif">Total: Rs {toatl.toFixed(2)}</p>
+      <button onClick={handleConfirmOrder} className="bg-green-500 hover:bg-green-400  text-white py-2 px-4 rounded-lg hover:bg-green-600 font-serif">
         Confirm Order
       </button>
       <button className="bg-blue-400 hover:bg-gray-400 text-white py-2 my-3 px-4 rounded-lg hover:bg-green-600 font-serif " onClick={clearOrder}>

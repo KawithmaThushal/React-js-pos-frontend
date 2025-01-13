@@ -1,7 +1,20 @@
+import axios from "axios";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import StockType from "../Type/StockType";
 
 function Home(){
   const navigate =useNavigate()
+
+  const [lowitems, setLowitems] = useState<StockType[]>([]);
+  const [TodaySell, setTodaySell] = useState<number>(0.0);
+  const [TodaySellItems, setTodaySellItems] = useState<number>(0);
+  const [SellFullItems, setSellFullItems] = useState<number>(0);
+  const [SellFullAmounts, setSellFullAmounts] = useState<number>(0.0);
+
+
+
+
 
   function clickMenu(){
       navigate("/menu")
@@ -12,6 +25,114 @@ function Home(){
 function clickProduct(){
   navigate("/product")
 }
+
+
+    // async functions
+    async function getlowitemsame() {
+      try {
+        const respones = await axios.get("http://localhost:8081/dayfood/lowQuantity");
+        setLowitems(respones.data);
+      } catch (error) {
+        console.error("Error loading categories:", error);
+      if (axios.isAxiosError(error)) {
+          console.error("Axios error details:", error.response);
+          if (error.response?.status === 403) {
+              console.error("Forbidden! You are not authorized to access this resource.");
+          } else if (error.response?.status === 401) {
+              console.error("Unauthorized! Check your JWT token.");
+          }
+      }
+        
+      }
+    }
+
+    async function getTodaySell() {
+      try {
+        const respones = await axios.get("http://localhost:8081/fullTodayAmunt");
+        console.log(respones.data);
+        setTodaySell(respones.data);
+      } catch (error) {
+        console.error("Error loading categories:", error);
+        if (axios.isAxiosError(error)) {
+            console.error("Axios error details:", error.response);
+            if (error.response?.status === 403) {
+                console.error("Forbidden! You are not authorized to access this resource.");
+            } else if (error.response?.status === 401) {
+                console.error("Unauthorized! Check your JWT token.");
+            }
+        }
+          
+      }
+      
+    }
+
+    async function getTodaySellItems() {
+      try {
+        const respones = await axios.get("http://localhost:8081/fullTodayItems");
+        console.log(respones.data);
+        setTodaySellItems(respones.data);
+      } catch (error) {
+        console.error("Error loading categories:", error);
+        if (axios.isAxiosError(error)) {
+            console.error("Axios error details:", error.response);
+            if (error.response?.status === 403) {
+                console.error("Forbidden! You are not authorized to access this resource.");
+            } else if (error.response?.status === 401) {
+                console.error("Unauthorized! Check your JWT token.");
+            }
+        }
+          
+      }
+      
+    }
+
+    async function getSellFullItems() {
+      try {
+        const respones = await axios.get("http://localhost:8081/fullItems");
+        console.log(respones.data);
+        setSellFullItems(respones.data);
+      } catch (error) {
+        console.error("Error loading categories:", error);
+        if (axios.isAxiosError(error)) {
+            console.error("Axios error details:", error.response);
+            if (error.response?.status === 403) {
+                console.error("Forbidden! You are not authorized to access this resource.");
+            } else if (error.response?.status === 401) {
+                console.error("Unauthorized! Check your JWT token.");
+            }
+        }
+          
+      }
+      
+    }
+
+    async function getSellFullAmount() {
+      try {
+        const respones = await axios.get("http://localhost:8081/fullamount");
+        console.log(respones.data);
+        setSellFullAmounts(respones.data);
+      } catch (error) {
+        console.error("Error loading categories:", error);
+        if (axios.isAxiosError(error)) {
+            console.error("Axios error details:", error.response);
+            if (error.response?.status === 403) {
+                console.error("Forbidden! You are not authorized to access this resource.");
+            } else if (error.response?.status === 401) {
+                console.error("Unauthorized! Check your JWT token.");
+            }
+        }
+          
+      }
+      
+    }
+
+    useEffect(() => {
+             getlowitemsame();
+             getTodaySell();
+             getTodaySellItems();
+             getSellFullItems();
+             getSellFullAmount();
+            }, []);
 
     return(
       <div className="flex h-screen">
@@ -107,10 +228,10 @@ function clickProduct(){
             <div className="col-span-8 shadow-md">
             <div className="grid grid-cols-2 gap-4 ">
               {[
-                { title: "Today's Sell", value: "৳ 1,200,000", change: "↑ 4.3%" },
-                { title: "Orders", value: "৳ 1,200,000", change: "↑ 4.3%" },
-                { title: "Today's Sell", value: "৳ 1,200,000", change: "↑ 4.3%" },
-                { title: "Orders", value: "৳ 1,200,000", change: "↑ 4.3%" },
+                { title: "Today's Sell", value: "Rs:"+TodaySell, change: "↑ 4.3%" },
+                { title: "Today Sell Items", value: TodaySellItems, change: "↑ 4.3%" },
+                { title: "Total Sell Items", value: SellFullItems, change: "↑ 4.3%" },
+                { title: "Total Sell Amount", value: "Rs:"+SellFullAmounts, change: "↑ 4.3%" },
               ].map((card, index) => (
                 <div
                   key={index}
@@ -134,28 +255,28 @@ function clickProduct(){
 
           {/* Section 4: Stock Alerts */}
           <div className="col-span-4 bg-white p-4 rounded-xl  shadow-md">
-            <h3 className="text-lg font-bold font-serif  mb-4">Stock Alerts</h3>
-            <p className="text-sm text-gray-500 mb-4 font-serif ">Low Quantity Stock</p>
-            <ul className="space-y-2">
-              <li className="flex justify-between items-center text-gray-700">
-                <span className="font-serif ">Product Name</span>
+          <h3 className="text-lg font-bold font-serif mb-2">
+  Stock Alerts <span className="text-sm text-gray-500 font-normal">- Low Quantity Stock</span>
+</h3>
+            <ul className="space-y-2 max-h-40 overflow-y-scroll">
+              {lowitems.map(function (lowitem){
+                return(
+                 
+                     <li className="flex justify-between items-center text-gray-700">
+                <span className="font-serif ">{lowitem.product?.productname}</span>
                 <button className="px-3 py-1 text-xs text-red-500 font-serif  bg-red-100 hover:bg-red-200  rounded-full">
                   Reorder
                 </button>
               </li>
-              <li className="flex justify-between items-center text-gray-700">
-                <span  className="font-serif ">Product Name</span>
-                <button className="px-3 py-1 text-xs text-red-500 font-serif  bg-red-100 rounded-full hover:bg-red-200 ">
-                  Reorder
-                </button>
-              </li>
-              <li className="flex justify-between items-center text-gray-700">
-                <span  className="font-serif ">Product Name</span>
-                <button className="px-3 py-1 text-xs text-red-500 font-serif  bg-red-100 rounded-full hover:bg-red-200 ">
-                  Reorder
-                </button>
-              </li>
-            </ul>
+
+                  
+                )
+              })}
+          </ul>
+
+
+
+         
           </div>
         </div>
 
