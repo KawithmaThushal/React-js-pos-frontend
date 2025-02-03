@@ -5,6 +5,10 @@ import { AuthProvider } from './Contex/AuthContext'
 import './CustomCss/custom.css'
 import Login from './page/auth/Login'
 import LoginUp from './page/auth/LoginUp'
+import AddEmployee from './page/Employee/AddeEmployee'
+import Employe from './page/Employee/Employe'
+import MangeEmploye from './page/Employee/MangeEmploye'
+import ViewEmployee from './page/Employee/ViewEmployee'
 import Home from './page/Home'
 import ItemManage from './page/ItemManage'
 import Menu from './page/Menu'
@@ -36,6 +40,15 @@ function App() {
       <Route path="/product/Stock" element={<AddStock/>}/>
       <Route path="/product/DaliyKitchen" element={<DaliyKitchen/>}/>
       <Route path="/product/Supplyer" element={<Supplyer/>}/>
+      <Route path="/Employer" element={<Employe/>}/>
+      <Route path="/Employer/Add" element={<AddEmployee/>}/>
+      <Route path="/Employer/View" element={<ViewEmployee/>}/>
+      <Route path="/Employer/Mange" element={<MangeEmploye/>}/>
+
+
+
+
+
 
 
 

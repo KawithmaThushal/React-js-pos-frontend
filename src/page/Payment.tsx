@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -9,13 +10,13 @@ function Payment(){
   const [discount, setDiscount]= useState<number>(0);
   const [Cash, setCash]= useState<number>(0);
   const [balance, setBalance] = useState<number>(0);
-  const [isTable, setTable] = useState(false);
-  const [isTakeAway, setIsTakeAway] = useState(false);
+
+  const [orderType, setOrderType] = useState<String>(""); 
 
   
 
 
-  const { orderDetails = [], totalQuantity = 0, totalAmount = 0 } =
+  const { orderDetails = [], totalQuantity = 0, totalAmount = 0 ,orderIDs=[]} =
   location.state || {};
 
   const [paymentAmount, setPaymentAmount] = useState<number>(totalAmount);
@@ -44,21 +45,17 @@ function Payment(){
     
   }
 
+
+
 function handleServiceCharge(e:any){
-  setServiceCharge(e.target.value);
+  setServiceCharge(Number(e.target.value));
 }
-
 function handleDiscount(e:any){
-  setDiscount(e.target.value);
+  setDiscount(Number(e.target.value));
 }
-
 function handleBalnce(e:any){
-  setCash(e.target.value);
-}
-
-
-
-  
+  setCash(Number(e.target.value));
+} 
   function clickMenu(){
     navigate("/menu")
 }
@@ -70,6 +67,50 @@ navigate("/product")
 }
 function clickHome(){
 navigate("/dashboard")
+}
+
+// Single state for the order type
+
+  const handleOrderTypeChange = (type:any) => {
+    setOrderType(orderType === type ? "" : type); // Toggle the selection
+  };
+
+async function createOders() {
+  const data ={
+    netAmount: totalAmount,
+    serviceCharge,
+    discount,
+    cash: Cash,
+    balance,
+    oderType: orderType,
+    productIds: orderIDs,
+    quantity: totalQuantity,
+    fullAmount: paymentAmount,
+  }
+  try {
+    console.log("sending Data",data);
+   const respones= await axios.post(`http://localhost:8081/oders`,data,{
+    headers:{
+      "Content-Type": "application/json",
+    }
+   });
+    console.log("Respones:",respones.data);
+  } catch (error) {
+    console.error("Error loading categories:", error);
+        if (axios.isAxiosError(error)) {
+            console.error("Axios error details:", error.response);
+            if (error.response?.status === 403) {
+                console.error("Forbidden! You are not authorized to access this resource.");
+            } else if (error.response?.status === 401) {
+                console.error("Unauthorized! Check your JWT token.");
+            }
+        }
+  }
+}
+
+
+function clickEmployer(){
+  navigate("/Employer")
 }
     return(
         
@@ -106,7 +147,7 @@ navigate("/dashboard")
               <span className="mr-2">🛒</span> Inventory
             </li>
             </div>
-            <div className="my-8 p-2 w-full h-[50px] bg-slate-100   hover:bg-neutral-200 text-xl text-center flex items-center justify-center rounded-lg">
+            <div onClick={clickEmployer}  className="my-8 p-2 w-full h-[50px] bg-slate-100   hover:bg-neutral-200 text-xl text-center flex items-center justify-center rounded-lg">
             <li className="flex items-center font-serif text-slate-950  hover:text-black cursor-pointer">
               <span className="mr-2">👥</span> Employee
             </li>
@@ -259,11 +300,19 @@ navigate("/dashboard")
                   </div>
                   <div className="flex items-center space-x-4">
                     <label className="font-medium">Table</label>
-                    <input type="checkbox" 
-                    checked={isTable} onChange={(e)=> setTable(e.target.checked)} className="w-5 h-5 border rounded-md" />
+                    <input
+                          type="checkbox"
+                          checked={orderType === "Table"} // Check if "Table" is selected
+                          onChange={() => handleOrderTypeChange("Table")} // Set order type to "Table"
+                          className="w-5 h-5 border rounded-md"
+                      />
                     <label className="font-medium">Take Away</label>
-                    <input  checked={isTakeAway} onChange={(e)=> setIsTakeAway(e.target.checked)}
-                     type="checkbox" className="w-5 h-5 border rounded-md" />
+                    <input
+                       type="checkbox"
+                       checked={orderType === "Take Away"} // Check if "Take Away" is selected
+                      onChange={() => handleOrderTypeChange("Take Away")} // Set order type to "Take Away"
+                      className="w-5 h-5 border rounded-md"
+                      />
                   </div>
                 </div>
 
@@ -275,7 +324,7 @@ navigate("/dashboard")
                   <button onClick={clearoder} className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
                     Clear Order
                   </button>
-                  <button className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
+                  <button onClick={createOders} className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
                     Confirm Order
                   </button>
                 </div>

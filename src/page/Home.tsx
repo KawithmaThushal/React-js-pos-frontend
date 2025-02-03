@@ -11,6 +11,7 @@ function Home(){
   const [TodaySellItems, setTodaySellItems] = useState<number>(0);
   const [SellFullItems, setSellFullItems] = useState<number>(0);
   const [SellFullAmounts, setSellFullAmounts] = useState<number>(0.0);
+  const [currentTime, setCurrentTime] = useState<string>("");
 
 
 
@@ -25,6 +26,11 @@ function Home(){
 function clickProduct(){
   navigate("/product")
 }
+
+function clickEmployer(){
+  navigate("/Employer")
+}
+
 
 
     // async functions
@@ -125,6 +131,19 @@ function clickProduct(){
       }
       
     }
+    useEffect(() => {
+      const updateTime = () => {
+        const now = new Date();
+        setCurrentTime(now.toLocaleString());
+      };
+  
+      updateTime();
+      const interval = setInterval(updateTime, 1000);
+  
+      return () => clearInterval(interval);
+    }, []);
+    
+
 
     useEffect(() => {
              getlowitemsame();
@@ -168,7 +187,7 @@ function clickProduct(){
               <span className="mr-2">🛒</span> Inventory
             </li>
             </div>
-            <div className="my-8 p-2 w-full h-[50px] bg-slate-100   hover:bg-neutral-200 text-xl text-center flex items-center justify-center rounded-lg">
+            <div onClick={clickEmployer} className="my-8 p-2 w-full h-[50px] bg-slate-100   hover:bg-neutral-200 text-xl text-center flex items-center justify-center rounded-lg">
             <li className="flex items-center font-serif text-slate-950  hover:text-black cursor-pointer">
               <span className="mr-2">👥</span> Employee
             </li>
@@ -192,7 +211,7 @@ function clickProduct(){
         <div className="flex justify-between items-center bg-white py-4 px-6 ">
           <h2 className="text-xl font-serif  font-semibold">📍 Cashier/</h2>
           <div className="flex items-center space-x-4">
-            <span className="text-gray-500 font-serif ">October 18th 2002, 10:00AM</span>
+            <span className="text-gray-500 font-serif semi-bold">{currentTime}</span>
             <div className="w-10 h-10 rounded-full bg-gray-300"></div>
           </div>
         </div>

@@ -38,6 +38,10 @@ function clickHome(){
 navigate("/dashboard")
 }
 
+
+function clickEmployer(){
+  navigate("/Employer")
+}
 function handleProductid(e:any){
   setproductID(e.target.value);
 }
@@ -210,6 +214,7 @@ async function deleteStockDay(id:number) {
   
 }
 
+
 useEffect(function(){
   loadProducts();
   loadStock() ;
@@ -249,7 +254,7 @@ useEffect(function(){
                 <span className="mr-2">🛒</span> Inventory
               </li>
               </div>
-              <div className="my-8 p-2 w-full h-[50px] bg-slate-100   hover:bg-neutral-200 text-xl text-center flex items-center justify-center rounded-lg">
+              <div onClick={clickEmployer}  className="my-8 p-2 w-full h-[50px] bg-slate-100   hover:bg-neutral-200 text-xl text-center flex items-center justify-center rounded-lg">
               <li className="flex items-center font-serif text-slate-950  hover:text-black cursor-pointer">
                 <span className="mr-2">👥</span> Employee
               </li>

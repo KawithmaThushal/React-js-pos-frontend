@@ -1,10 +1,15 @@
-import { useState } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ProductsType from "../../Type/ProductsType";
 
 function Product(){
 
   const [selectedDateFilter, setSelectedDateFilter] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [productsView, setProducts] = useState<ProductsType[]>([]);
+
+
   const navigate =useNavigate()
 
   const filters = ["Last Day", "Today", "Tomorrow", "Next Week"];
@@ -18,22 +23,25 @@ function Product(){
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  const products = [
-    {
-      id: 1,
-      name: "Product A",
-      quantity: 10,
-      expireDate: "2024-12-15",
-    },
-    {
-      id: 2,
-      name: "Product B",
-      quantity: 5,
-      expireDate: "2024-12-20",
-    },
-    
-    
-  ];
+ 
+
+   async function loadProducts() {
+      try {
+        const respones= await axios.get(`http://localhost:8081/Product`);
+        setProducts(respones.data);
+      } catch (error) {
+        console.error("Error loading categories:", error);
+        if (axios.isAxiosError(error)) {
+            console.error("Axios error details:", error.response);
+            if (error.response?.status === 403) {
+                console.error("Forbidden! You are not authorized to access this resource.");
+            } else if (error.response?.status === 401) {
+                console.error("Unauthorized! Check your JWT token.");
+            }
+        }
+        
+      }
+    }
 
   function handleAddCategoryClick(){
       navigate("/product/Category");
@@ -74,7 +82,13 @@ function clickHome(){
 navigate("/dashboard")
 }
 
- 
+function clickEmployer(){
+  navigate("/Employer")
+}
+
+useEffect(function() {
+  loadProducts();
+},[])
 
     return(
         <div className="flex h-screen">
@@ -110,7 +124,7 @@ navigate("/dashboard")
                 <span className="mr-2">🛒</span> Inventory
               </li>
               </div>
-              <div className="my-8 p-2 w-full h-[50px] bg-slate-100   hover:bg-neutral-200 text-xl text-center flex items-center justify-center rounded-lg">
+              <div onClick={clickEmployer}  className="my-8 p-2 w-full h-[50px] bg-slate-100   hover:bg-neutral-200 text-xl text-center flex items-center justify-center rounded-lg">
               <li className="flex items-center font-serif text-slate-950  hover:text-black cursor-pointer">
                 <span className="mr-2">👥</span> Employee
               </li>
@@ -194,26 +208,18 @@ navigate("/dashboard")
           <tr>
             <th scope="col" className="px-6 py-3">Product ID</th>
             <th scope="col" className="px-6 py-3">Product Name</th>
-            <th scope="col" className="px-6 py-3">Quantity</th>
-            <th scope="col" className="px-6 py-3">Expire Date</th>
-            <th scope="col" className="px-6 py-3">Action</th>
+            <th scope="col" className="px-6 py-3">Category</th>
+            <th scope="col" className="px-6 py-3">Food Type</th>
           </tr>
         </thead>
         <tbody>
-          {products.map((product) => (
+          {productsView.map((product) => (
             <tr key={product.id} className="bg-white border-b hover:bg-gray-50">
               <td className="px-6 py-4">{product.id}</td>
-              <td className="px-6 py-4">{product.name}</td>
-              <td className="px-6 py-4">{product.quantity}</td>
-              <td className="px-6 py-4">{product.expireDate}</td>
-              <td className="px-6 py-4">
-                <button
-                  onClick={() => alert(`Remove product ${product.id}`)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                 🗑️ Remove
-                </button>
-              </td>
+              <td className="px-6 py-4">{product.productname}</td>
+              <td className="px-6 py-4">{product.category?.name}</td>
+              <td className="px-6 py-4" >{product.foodType}</td>
+              
             </tr>
           ))}
         </tbody>
